@@ -4,11 +4,11 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
-import com.example.quizapp.models.Question;
+import com.example.quizapp.models.Quiz;
 
 public interface QuizAPI {
     @GET("/")
-    Call<List<Question>> getQuiz(
+    Call<Quiz> getQuiz(
             @Query("amount") int amount,
             @Query("difficulty") String difficulty
     );

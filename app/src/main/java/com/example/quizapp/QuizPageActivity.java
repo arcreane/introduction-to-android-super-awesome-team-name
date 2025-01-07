@@ -21,10 +21,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import com.example.quizapp.models.Question;
 import com.example.quizapp.api.QuizAPI;
 import com.example.quizapp.api.RetrofitClient;
+import com.example.quizapp.models.Quiz;
 
 public class QuizPageActivity extends AppCompatActivity {
-
-    private static final String BASE_URL = "https://opentdb.com/";
 
     private TextView questionTextView;
     private Button option1Button, option2Button, option3Button, option4Button;
@@ -56,12 +55,12 @@ public class QuizPageActivity extends AppCompatActivity {
         QuizAPI quizAPI = retrofit.create(QuizAPI.class);
 
         // Make API call
-        Call<List<Question>> call = quizAPI.getQuiz(10, "9");
-        call.enqueue(new Callback<List<Question>>() {
+        Call<Quiz> call = quizAPI.getQuiz(10, "9");
+        call.enqueue(new Callback<Quiz>() {
             @Override
-            public void onResponse(Call<List<Question>> call, Response<List<Question>> response) {
+            public void onResponse(Call<Quiz> call, Response<Quiz> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    questionsList = response.body();
+                    questionsList = response.body().results;
                     displayQuestion();
                 } else {
                     Toast.makeText(QuizPageActivity.this, "Failed to load questions", Toast.LENGTH_SHORT).show();
@@ -69,7 +68,7 @@ public class QuizPageActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<Question>> call, Throwable t) {
+            public void onFailure(Call<Quiz> call, Throwable t) {
                 Toast.makeText(QuizPageActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("QuizAPI", "Failure: " + t.getMessage());
             }
