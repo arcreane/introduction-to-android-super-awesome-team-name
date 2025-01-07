@@ -9,6 +9,8 @@ activity = "1.9.3"
 constraintlayout = "2.1.4"
 
 [libraries]
+retrofit = "com.squareup.retrofit2:retrofit:2.9.0"
+convertor = "com.squareup.retrofit2:converter-gson:2.9.0"
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
