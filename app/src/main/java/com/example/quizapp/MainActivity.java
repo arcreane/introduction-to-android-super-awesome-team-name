@@ -1,6 +1,10 @@
 package com.example.quizapp;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Spinner;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +13,56 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
+
+    public void handleStartQuizButtonClick(View view) {
+        Difficulty quizDifficulty = Difficulty.easy;
+        Spinner difficultySpinner = findViewById(R.id.quizSettingsDifficultySelectSpinner);
+        String selectedDifficulty = difficultySpinner.getSelectedItem().toString().toLowerCase();
+
+        if (selectedDifficulty.isEmpty()) {
+            return;
+        }
+
+        switch (selectedDifficulty) {
+            case "easy":
+                break;
+            case "medium":
+                quizDifficulty = Difficulty.medium;
+                break;
+            case "hard":
+                quizDifficulty = Difficulty.hard;
+                break;
+        }
+
+        EditText numQuestionsInput = findViewById(R.id.quizSettingsNumQuestionsInput);
+        String numQuestionsText = numQuestionsInput.getText().toString();
+
+        if (numQuestionsText.isEmpty()) {
+            numQuestionsInput.setError("Please enter a number");
+            return;
+        }
+
+        int quizNumQuestions;
+        try {
+            quizNumQuestions = Integer.parseInt(numQuestionsText);
+        } catch (NumberFormatException e) {
+            numQuestionsInput.setError("Invalid number");
+            return;
+        }
+
+        if (quizNumQuestions <= 0 || quizNumQuestions > 25) {
+            numQuestionsInput.setError(getString(R.string.num_questions_input_error));
+            return;
+        }
+
+       /*
+        TODO:
+            Intent intent = new Intent(this, QuizActivity.class);
+            intent.putExtra("difficulty", quizDifficulty);
+            intent.putExtra("numQuestions", quizNumQuestions);
+            startActivity(intent);
+        */
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

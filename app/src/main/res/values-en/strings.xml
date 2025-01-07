@@ -6,6 +6,7 @@
     <string name="quiz_settings_num_questions_label">Enter # of questions:</string>
     <string name="start_quiz_button">Start Quiz !</string>
     <string name="num_questions_input_hint">Enter Number</string>
+    <string name="num_questions_input_error">Number must be between 1 and 25</string>
     <string-array name="difficulty_options">
         <item>Easy</item>
         <item>Medium</item>
