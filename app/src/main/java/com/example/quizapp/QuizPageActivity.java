@@ -16,7 +16,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import com.example.quizapp.models.Question;
 import com.example.quizapp.api.QuizAPI;
@@ -55,12 +54,12 @@ public class QuizPageActivity extends AppCompatActivity {
         QuizAPI quizAPI = retrofit.create(QuizAPI.class);
 
         // Make API call
-        Call<Quiz> call = quizAPI.getQuiz(10, "9");
+        Call<Quiz> call = quizAPI.getQuiz(10, "multiple", "easy");
         call.enqueue(new Callback<Quiz>() {
             @Override
             public void onResponse(Call<Quiz> call, Response<Quiz> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    questionsList = response.body().results;
+                    questionsList = response.body().getResults();
                     displayQuestion();
                 } else {
                     Toast.makeText(QuizPageActivity.this, "Failed to load questions", Toast.LENGTH_SHORT).show();
@@ -84,8 +83,8 @@ public class QuizPageActivity extends AppCompatActivity {
             questionTextView.setText(question.getQuestion());
 
             // Shuffle options (to randomize button positions)
-            List<String> options = new ArrayList<>(question.getIncorrectAnswers());
-            options.add(question.getCorrectAnswer());
+            List<String> options = new ArrayList<>(question.getIncorrect_answers());
+            options.add(question.getCorrect_answer());
             java.util.Collections.shuffle(options);
 
             // Set button texts
@@ -95,7 +94,7 @@ public class QuizPageActivity extends AppCompatActivity {
             option4Button.setText(options.get(3));
 
             // Set button click listeners
-            setOptionButtonListeners(question.getCorrectAnswer());
+            setOptionButtonListeners(question.getCorrect_answer());
         } else {
             Toast.makeText(this, "Quiz Completed!", Toast.LENGTH_LONG).show();
         }

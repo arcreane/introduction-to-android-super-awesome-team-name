@@ -7,9 +7,10 @@ import retrofit2.http.Query;
 import com.example.quizapp.models.Quiz;
 
 public interface QuizAPI {
-    @GET("/")
+    @GET("api.php?")
     Call<Quiz> getQuiz(
             @Query("amount") int amount,
+            @Query("type") String type,
             @Query("difficulty") String difficulty
     );
 }
