@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">QuizApp</string>
     <string name="question_text_view_loading">Loading question...</string>
     <string name="question_number">Question #</string>
     <string name="quiz_score">Score:</string>

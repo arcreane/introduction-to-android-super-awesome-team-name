@@ -24,11 +24,13 @@ import com.example.quizapp.models.Quiz;
 
 public class QuizPageActivity extends AppCompatActivity {
 
-    private TextView questionTextView;
+    private TextView questionNumberTextView, questionTextView, scoreTextView;
     private Button option1Button, option2Button, option3Button, option4Button;
 
     private List<Question> questionsList = new ArrayList<>();
     private int currentQuestionIndex = 0;
+
+    private int score = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +38,8 @@ public class QuizPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_quiz_page);
 
         // Initialize views
+        questionNumberTextView = findViewById(R.id.questionNumberTextView);
+        scoreTextView = findViewById(R.id.scoreTextView);
         questionTextView = findViewById(R.id.questionTextView);
         option1Button = findViewById(R.id.option1Button);
         option2Button = findViewById(R.id.option2Button);
@@ -76,8 +80,26 @@ public class QuizPageActivity extends AppCompatActivity {
 
     private void displayQuestion() {
         if (currentQuestionIndex < questionsList.size()) {
+            //Update question number and score in header
+            questionNumberTextView.setText(String.format("%s%d/%d", getString(R.string.question_number), currentQuestionIndex + 1, questionsList.size()));
+
+
             // Get the current question
             Question question = questionsList.get(currentQuestionIndex);
+
+            int question_points;
+
+            switch (question.getDifficulty()) {
+                case "easy":
+                    question_points = 5;
+                    break;
+                case "medium":
+                    question_points = 10;
+                    break;
+                default:
+                    question_points = 15;
+                    break;
+            }
 
             // Set question text
             questionTextView.setText(question.getQuestion());
@@ -94,19 +116,21 @@ public class QuizPageActivity extends AppCompatActivity {
             option4Button.setText(options.get(3));
 
             // Set button click listeners
-            setOptionButtonListeners(question.getCorrect_answer());
+            setOptionButtonListeners(question.getCorrect_answer(), question_points);
         } else {
             Toast.makeText(this, "Quiz Completed!", Toast.LENGTH_LONG).show();
         }
     }
 
-    private void setOptionButtonListeners(String correctAnswer) {
+    private void setOptionButtonListeners(String correctAnswer, Integer points) {
         View.OnClickListener listener = v -> {
             Button clickedButton = (Button) v;
             String selectedAnswer = clickedButton.getText().toString();
 
             if (selectedAnswer.equals(correctAnswer)) {
                 Toast.makeText(QuizPageActivity.this, "Correct!", Toast.LENGTH_SHORT).show();
+                score += points;
+                scoreTextView.setText(String.format("%s %d", getString(R.string.quiz_score), score));
             } else {
                 Toast.makeText(QuizPageActivity.this, "Wrong! Correct Answer: " + correctAnswer, Toast.LENGTH_SHORT).show();
             }
