@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -24,7 +25,7 @@ import com.example.quizapp.models.Quiz;
 
 public class QuizPageActivity extends AppCompatActivity {
 
-    private TextView questionNumberTextView, questionTextView, scoreTextView;
+    private TextView questionNumberTextView, questionTextView, scoreTextView, difficultyTextView;
     private Button option1Button, option2Button, option3Button, option4Button;
 
     private List<Question> questionsList = new ArrayList<>();
@@ -40,6 +41,7 @@ public class QuizPageActivity extends AppCompatActivity {
         // Initialize views
         questionNumberTextView = findViewById(R.id.questionNumberTextView);
         scoreTextView = findViewById(R.id.scoreTextView);
+        difficultyTextView = findViewById(R.id.difficultyTextView);
         questionTextView = findViewById(R.id.questionTextView);
         option1Button = findViewById(R.id.option1Button);
         option2Button = findViewById(R.id.option2Button);
@@ -58,7 +60,7 @@ public class QuizPageActivity extends AppCompatActivity {
         QuizAPI quizAPI = retrofit.create(QuizAPI.class);
 
         // Make API call
-        Call<Quiz> call = quizAPI.getQuiz(10, "multiple", "easy", "url3986");
+        Call<Quiz> call = quizAPI.getQuiz(10, "multiple", "url3986");
         call.enqueue(new Callback<Quiz>() {
             @Override
             public void onResponse(Call<Quiz> call, Response<Quiz> response) {
@@ -87,22 +89,31 @@ public class QuizPageActivity extends AppCompatActivity {
             // Get the current question
             Question question = questionsList.get(currentQuestionIndex);
 
+            String difficulty = question.getDifficulty();
+
+
             int question_points;
 
-            switch (question.getDifficulty()) {
+            switch (difficulty.toLowerCase()) {
                 case "easy":
                     question_points = 5;
+                    difficultyTextView.setTextColor(getColor(R.color.difficulty_easy));
                     break;
                 case "medium":
                     question_points = 10;
+                    difficultyTextView.setTextColor(getColor(R.color.difficulty_medium));
                     break;
                 default:
                     question_points = 15;
+                    difficultyTextView.setTextColor(getColor(R.color.difficulty_hard));
                     break;
             }
 
             // Set question text
             questionTextView.setText(question.getQuestion());
+            String formattedDifficulty = difficulty.substring(0, 1).toUpperCase() +
+                    difficulty.substring(1).toLowerCase();
+            difficultyTextView.setText(String.format(getString(R.string.difficulty_label), formattedDifficulty));
 
             // Shuffle options (to randomize button positions)
             List<String> options = new ArrayList<>(question.getIncorrect_answers());

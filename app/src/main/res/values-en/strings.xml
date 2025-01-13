@@ -3,4 +3,5 @@
     <string name="question_text_view_loading">Loading question...</string>
     <string name="question_number">Question #</string>
     <string name="quiz_score">Score:</string>
+    <string name="difficulty_label">Difficulty: %s</string>
 </resources>
