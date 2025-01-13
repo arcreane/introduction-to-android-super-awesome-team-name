@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">QuizApp</string>
     <string name="question_text_view_loading">Loading question…</string>
-    <string name="question_number">Question #</string>
-    <string name="quiz_score">Score:</string>
+    <string name="question_number">Question # %d/%d</string>
+    <string name="quiz_score">Score: %d</string>
     <string name="difficulty_label">Difficulty: %s</string>
     <string name="welcome_banner_text">Welcome to the Quiz App!</string>
     <string name="quiz_settings_difficulty_label">Select your difficulty:</string>
@@ -11,8 +11,15 @@
     <string name="num_questions_input_hint">Enter Number</string>
     <string name="num_questions_input_error">Number must be between 1 and 25</string>
     <string-array name="difficulty_options">
+        <item>Any</item>
         <item>Easy</item>
         <item>Medium</item>
         <item>Hard</item>
     </string-array>
+    <string name="quiz_completed">Quiz Completed!</string>
+    <string name="your_score">Your Score: %1$d</string>
+    <string name="restart_quiz">Replay Quiz</string>
+    <string name="return_home">Return Home</string>
+    <string name="exit">Exit</string>
+
 </resources>

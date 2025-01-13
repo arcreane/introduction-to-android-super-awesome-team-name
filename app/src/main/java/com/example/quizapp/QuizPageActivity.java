@@ -1,6 +1,8 @@
 package com.example.quizapp;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,6 +41,10 @@ public class QuizPageActivity extends AppCompatActivity {
     private Vibrator vibrator;
 
     private MediaPlayer mediaPlayer;
+
+    private Difficulty difficulty;
+
+    private int numQuestions;
 
     private List<Question> questionsList = new ArrayList<>();
     private int currentQuestionIndex = 0;
@@ -64,6 +71,15 @@ public class QuizPageActivity extends AppCompatActivity {
         vibrator = vibratorManager.getDefaultVibrator();
 
         mediaPlayer = MediaPlayer.create(this, R.raw.correct_answer);
+        // Get difficulty and number of questions from intent
+        Intent intent = getIntent();
+        String difficultyStr = intent.getStringExtra("difficulty");
+        Log.d("QuizPageActivity", "Difficulty: " + difficultyStr);
+        if (difficultyStr == null) {
+            difficultyStr = "any";
+        }
+        difficulty = Difficulty.valueOf(difficultyStr);
+        numQuestions = intent.getIntExtra("numQuestions", 10);
 
         // Fetch quiz questions
         fetchQuizQuestions();
@@ -83,10 +99,6 @@ public class QuizPageActivity extends AppCompatActivity {
             public void onResponse(Call<Quiz> call, Response<Quiz> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     questionsList = response.body().getResults();
-                    // Play success tone
-                    if (mediaPlayer != null) {
-                        mediaPlayer.start();
-                    }
                     displayQuestion();
                 } else {
                     Toast.makeText(QuizPageActivity.this, "Failed to load questions", Toast.LENGTH_SHORT).show();
@@ -163,7 +175,6 @@ public class QuizPageActivity extends AppCompatActivity {
                 Toast.makeText(QuizPageActivity.this, "Correct!", Toast.LENGTH_SHORT).show();
                 score += points;
                 scoreTextView.setText(String.format("%s %d", getString(R.string.quiz_score), score));
-
                 // Play sound for correct answer
                 if (mediaPlayer != null) {
                     if (mediaPlayer.isPlaying()) {
@@ -174,8 +185,7 @@ public class QuizPageActivity extends AppCompatActivity {
                 }
             } else {
                 Toast.makeText(QuizPageActivity.this, "Wrong! Correct Answer: " + correctAnswer, Toast.LENGTH_SHORT).show();
-
-                // Vibrate for wrong answer
+                // Vibrate for 500 milliseconds
                 if (vibrator != null && vibrator.hasVibrator()) {
                     long duration = 500; // Define the duration in milliseconds
                     vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
@@ -192,7 +202,9 @@ public class QuizPageActivity extends AppCompatActivity {
         option2Button.setOnClickListener(listener);
         option3Button.setOnClickListener(listener);
         option4Button.setOnClickListener(listener);
+
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -200,5 +212,37 @@ public class QuizPageActivity extends AppCompatActivity {
             mediaPlayer.release();
             mediaPlayer = null;
         }
+    }
+    private void showSummaryDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.popup_quiz_summary, null);
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        TextView summaryScore = dialogView.findViewById(R.id.summaryScore);
+        summaryScore.setText(String.format(getString(R.string.your_score), score));
+
+        Button restartButton = dialogView.findViewById(R.id.restartButton);
+        Button returnHomeButton = dialogView.findViewById(R.id.returnHomeButton);
+
+        restartButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            Intent restartIntent = new Intent(this, QuizPageActivity.class);
+            restartIntent.putExtra("difficulty", difficulty.toString());
+            restartIntent.putExtra("numQuestions", numQuestions);
+            startActivity(restartIntent);
+            finish();
+        });
+
+        returnHomeButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            Intent restartIntent = new Intent(this, MainActivity.class);
+            startActivity(restartIntent);
+            finish();
+        });
+
+        dialog.show();
     }
 }

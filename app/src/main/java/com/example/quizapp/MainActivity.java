@@ -15,7 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 public class MainActivity extends AppCompatActivity {
 
     public void handleStartQuizButtonClick(View view) {
-        Difficulty quizDifficulty = Difficulty.easy;
+        Difficulty quizDifficulty = Difficulty.any;
         Spinner difficultySpinner = findViewById(R.id.quizSettingsDifficultySelectSpinner);
         String selectedDifficulty = difficultySpinner.getSelectedItem().toString().toLowerCase();
 
@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
         switch (selectedDifficulty) {
             case "easy":
+                quizDifficulty = Difficulty.easy;
                 break;
             case "medium":
                 quizDifficulty = Difficulty.medium;
@@ -55,13 +56,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-       /*
-        TODO:
-            Intent intent = new Intent(this, QuizActivity.class);
-            intent.putExtra("difficulty", quizDifficulty);
-            intent.putExtra("numQuestions", quizNumQuestions);
-            startActivity(intent);
-        */
+        Intent intent = new Intent(this, QuizPageActivity.class);
+        intent.putExtra("difficulty", quizDifficulty.toString());
+        intent.putExtra("numQuestions", quizNumQuestions);
+        startActivity(intent);
+
     }
 
     @Override
