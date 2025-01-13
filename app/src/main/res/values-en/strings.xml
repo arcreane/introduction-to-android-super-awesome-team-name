@@ -19,7 +19,7 @@
     <string name="difficulty_label">Difficulty: %s</string>
     <string name="quiz_completed">Quiz Completed!</string>
     <string name="your_score">Your Score: %1$d</string>
-    <string name="restart_quiz">Restart Quiz</string>
+    <string name="restart_quiz">Replay Quiz</string>
     <string name="return_home">Return Home</string>
     <string name="exit">Exit</string>
 </resources>
