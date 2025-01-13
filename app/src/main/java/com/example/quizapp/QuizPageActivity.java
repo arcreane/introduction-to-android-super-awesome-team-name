@@ -1,6 +1,7 @@
 package com.example.quizapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
@@ -60,11 +61,20 @@ public class QuizPageActivity extends AppCompatActivity {
         VibratorManager vibratorManager = (VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
         vibrator = vibratorManager.getDefaultVibrator();
 
+        Intent intent = getIntent();
+        String difficultyStr = intent.getStringExtra("difficulty");
+        Log.d("QuizPageActivity", "Difficulty: " + difficultyStr);
+        if (difficultyStr == null) {
+            difficultyStr = "any";
+        }
+        Difficulty difficulty = Difficulty.valueOf(difficultyStr);
+        int numQuestions = intent.getIntExtra("numQuestions", 10);
+
         // Fetch quiz questions
-        fetchQuizQuestions();
+        fetchQuizQuestions(difficulty, numQuestions);
     }
 
-    private void fetchQuizQuestions() {
+    private void fetchQuizQuestions(Difficulty difficulty, int numQuestions) {
         // Initialize Retrofit
         Retrofit retrofit = RetrofitClient.getClient();
 
@@ -72,7 +82,14 @@ public class QuizPageActivity extends AppCompatActivity {
         QuizAPI quizAPI = retrofit.create(QuizAPI.class);
 
         // Make API call
-        Call<Quiz> call = quizAPI.getQuiz(10, "multiple", "url3986");
+        Call<Quiz> call;
+        if (difficulty == Difficulty.any) {
+            call = quizAPI.getQuiz(numQuestions, "multiple", "url3986");
+            Log.d("QuizAPI", "Difficulty: Any");
+        } else {
+            call = quizAPI.getQuiz(numQuestions, "multiple", "url3986", difficulty.toString());
+            Log.d("QuizAPI", "Difficulty: " + difficulty);
+        }
         call.enqueue(new Callback<Quiz>() {
             @Override
             public void onResponse(Call<Quiz> call, Response<Quiz> response) {

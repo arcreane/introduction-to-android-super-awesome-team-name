@@ -11,6 +11,7 @@
     <string name="num_questions_input_hint">Enter Number</string>
     <string name="num_questions_input_error">Number must be between 1 and 25</string>
     <string-array name="difficulty_options">
+        <item>Any</item>
         <item>Easy</item>
         <item>Medium</item>
         <item>Hard</item>
