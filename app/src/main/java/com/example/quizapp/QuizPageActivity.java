@@ -1,6 +1,7 @@
 package com.example.quizapp;
 
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
@@ -36,6 +37,8 @@ public class QuizPageActivity extends AppCompatActivity {
 
     private Vibrator vibrator;
 
+    private MediaPlayer mediaPlayer;
+
     private List<Question> questionsList = new ArrayList<>();
     private int currentQuestionIndex = 0;
 
@@ -60,6 +63,8 @@ public class QuizPageActivity extends AppCompatActivity {
         VibratorManager vibratorManager = (VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
         vibrator = vibratorManager.getDefaultVibrator();
 
+        mediaPlayer = MediaPlayer.create(this, R.raw.correct_answer);
+
         // Fetch quiz questions
         fetchQuizQuestions();
     }
@@ -78,6 +83,10 @@ public class QuizPageActivity extends AppCompatActivity {
             public void onResponse(Call<Quiz> call, Response<Quiz> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     questionsList = response.body().getResults();
+                    // Play success tone
+                    if (mediaPlayer != null) {
+                        mediaPlayer.start();
+                    }
                     displayQuestion();
                 } else {
                     Toast.makeText(QuizPageActivity.this, "Failed to load questions", Toast.LENGTH_SHORT).show();
@@ -154,9 +163,19 @@ public class QuizPageActivity extends AppCompatActivity {
                 Toast.makeText(QuizPageActivity.this, "Correct!", Toast.LENGTH_SHORT).show();
                 score += points;
                 scoreTextView.setText(String.format("%s %d", getString(R.string.quiz_score), score));
+
+                // Play sound for correct answer
+                if (mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                        mediaPlayer.prepareAsync();
+                    }
+                    mediaPlayer.start();
+                }
             } else {
                 Toast.makeText(QuizPageActivity.this, "Wrong! Correct Answer: " + correctAnswer, Toast.LENGTH_SHORT).show();
-                // Vibrate for 500 milliseconds
+
+                // Vibrate for wrong answer
                 if (vibrator != null && vibrator.hasVibrator()) {
                     long duration = 500; // Define the duration in milliseconds
                     vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
@@ -173,5 +192,13 @@ public class QuizPageActivity extends AppCompatActivity {
         option2Button.setOnClickListener(listener);
         option3Button.setOnClickListener(listener);
         option4Button.setOnClickListener(listener);
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 }
