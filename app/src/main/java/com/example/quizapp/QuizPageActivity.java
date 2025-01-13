@@ -2,7 +2,7 @@ package com.example.quizapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.VibratorManager;
@@ -13,12 +13,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Vibrator;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
+import java.util.Objects;
+
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -42,6 +44,9 @@ public class QuizPageActivity extends AppCompatActivity {
 
     private int score = 0;
 
+    private Difficulty difficulty;
+    private int numQuestions;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,21 +66,21 @@ public class QuizPageActivity extends AppCompatActivity {
         VibratorManager vibratorManager = (VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
         vibrator = vibratorManager.getDefaultVibrator();
 
+        // Get difficulty and number of questions from intent
         Intent intent = getIntent();
         String difficultyStr = intent.getStringExtra("difficulty");
         Log.d("QuizPageActivity", "Difficulty: " + difficultyStr);
         if (difficultyStr == null) {
             difficultyStr = "any";
         }
-        Difficulty difficulty = Difficulty.valueOf(difficultyStr);
-        int numQuestions = intent.getIntExtra("numQuestions", 10);
+        difficulty = Difficulty.valueOf(difficultyStr);
+        numQuestions = intent.getIntExtra("numQuestions", 10);
 
         // Fetch quiz questions
-        fetchQuizQuestions(difficulty, numQuestions);
+        fetchQuizQuestions();
     }
 
-    private void fetchQuizQuestions(Difficulty difficulty, int numQuestions) {
-        Log.d("fetchQuizQuestions", "Difficulty: " + difficulty);
+    private void fetchQuizQuestions() {
         // Initialize Retrofit
         Retrofit retrofit = RetrofitClient.getClient();
 
@@ -91,9 +96,9 @@ public class QuizPageActivity extends AppCompatActivity {
             call = quizAPI.getQuiz(numQuestions, "multiple", "url3986", difficulty.toString());
             Log.d("QuizAPI", "Difficulty: " + difficulty);
         }
-        call.enqueue(new Callback<Quiz>() {
+        call.enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<Quiz> call, Response<Quiz> response) {
+            public void onResponse(@NonNull Call<Quiz> call, @NonNull Response<Quiz> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     questionsList = response.body().getResults();
                     displayQuestion();
@@ -103,7 +108,7 @@ public class QuizPageActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<Quiz> call, Throwable t) {
+            public void onFailure(@NonNull Call<Quiz> call, @NonNull Throwable t) {
                 Toast.makeText(QuizPageActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("QuizAPI", "Failure: " + t.getMessage());
             }
@@ -113,7 +118,7 @@ public class QuizPageActivity extends AppCompatActivity {
     private void displayQuestion() {
         if (currentQuestionIndex < questionsList.size()) {
             //Update question number and score in header
-            questionNumberTextView.setText(String.format("%s%d/%d", getString(R.string.question_number), currentQuestionIndex + 1, questionsList.size()));
+            questionNumberTextView.setText(String.format(getString(R.string.question_number), currentQuestionIndex + 1, questionsList.size()));
 
 
             // Get the current question
@@ -159,7 +164,7 @@ public class QuizPageActivity extends AppCompatActivity {
             // Set button click listeners
             setOptionButtonListeners(question.getCorrect_answer(), question_points);
         } else {
-            Toast.makeText(this, "Quiz Completed!", Toast.LENGTH_LONG).show();
+            showSummaryDialog();
         }
     }
 
@@ -171,7 +176,7 @@ public class QuizPageActivity extends AppCompatActivity {
             if (selectedAnswer.equals(correctAnswer)) {
                 Toast.makeText(QuizPageActivity.this, "Correct!", Toast.LENGTH_SHORT).show();
                 score += points;
-                scoreTextView.setText(String.format("%s %d", getString(R.string.quiz_score), score));
+                scoreTextView.setText(String.format(getString(R.string.quiz_score), score));
             } else {
                 Toast.makeText(QuizPageActivity.this, "Wrong! Correct Answer: " + correctAnswer, Toast.LENGTH_SHORT).show();
                 // Vibrate for 500 milliseconds
@@ -192,4 +197,38 @@ public class QuizPageActivity extends AppCompatActivity {
         option3Button.setOnClickListener(listener);
         option4Button.setOnClickListener(listener);
     }
+
+    private void showSummaryDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.popup_quiz_summary, null);
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        TextView summaryScore = dialogView.findViewById(R.id.summaryScore);
+        summaryScore.setText(String.format(getString(R.string.your_score), score));
+
+        Button restartButton = dialogView.findViewById(R.id.restartButton);
+        Button returnHomeButton = dialogView.findViewById(R.id.returnHomeButton);
+
+        restartButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            Intent restartIntent = new Intent(this, QuizPageActivity.class);
+            restartIntent.putExtra("difficulty", difficulty.toString());
+            restartIntent.putExtra("numQuestions", numQuestions);
+            startActivity(restartIntent);
+            finish();
+        });
+
+        returnHomeButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            Intent restartIntent = new Intent(this, MainActivity.class);
+            startActivity(restartIntent);
+            finish();
+        });
+
+        dialog.show();
+    }
+
 }
