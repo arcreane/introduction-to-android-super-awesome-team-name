@@ -11,9 +11,9 @@ public interface QuizAPI {
     Call<Quiz> getQuiz(
             @Query("amount") int amount,
             @Query("type") String type,
-            @Query("difficulty") String difficulty,
-            @Query("encode") String encode
-    );
+            @Query("encode") String encode,
+            @Query("difficulty") String difficulty
+            );
 
     @GET("api.php?")
     Call<Quiz> getQuiz(
