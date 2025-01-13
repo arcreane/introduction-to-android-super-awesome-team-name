@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-
         Intent intent = new Intent(this, QuizPageActivity.class);
         intent.putExtra("difficulty", quizDifficulty.toString());
         intent.putExtra("numQuestions", quizNumQuestions);

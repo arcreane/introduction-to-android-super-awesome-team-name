@@ -75,6 +75,7 @@ public class QuizPageActivity extends AppCompatActivity {
     }
 
     private void fetchQuizQuestions(Difficulty difficulty, int numQuestions) {
+        Log.d("fetchQuizQuestions", "Difficulty: " + difficulty);
         // Initialize Retrofit
         Retrofit retrofit = RetrofitClient.getClient();
 
