@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">QuizApp</string>
+    <string name="question_text_view_loading">Loading question…</string>
+    <string name="question_number">Question #</string>
+    <string name="quiz_score">Score:</string>
+    <string name="difficulty_label">Difficulty: %s</string>
     <string name="welcome_banner_text">Welcome to the Quiz App!</string>
     <string name="quiz_settings_difficulty_label">Select your difficulty:</string>
     <string name="quiz_settings_num_questions_label">Enter # of questions:</string>
