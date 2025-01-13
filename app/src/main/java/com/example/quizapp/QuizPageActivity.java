@@ -70,7 +70,7 @@ public class QuizPageActivity extends AppCompatActivity {
         QuizAPI quizAPI = retrofit.create(QuizAPI.class);
 
         // Make API call
-        Call<Quiz> call = quizAPI.getQuiz(10, "multiple", "easy");
+        Call<Quiz> call = quizAPI.getQuiz(10, "multiple", "easy", "url3986");
         call.enqueue(new Callback<Quiz>() {
             @Override
             public void onResponse(Call<Quiz> call, Response<Quiz> response) {

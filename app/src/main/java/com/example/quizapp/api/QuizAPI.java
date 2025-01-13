@@ -11,6 +11,7 @@ public interface QuizAPI {
     Call<Quiz> getQuiz(
             @Query("amount") int amount,
             @Query("type") String type,
-            @Query("difficulty") String difficulty
+            @Query("difficulty") String difficulty,
+            @Query("encode") String encode
     );
 }
