@@ -1,15 +1,21 @@
 package com.example.quizapp;
 
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.VibratorManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Vibrator;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import retrofit2.Call;
@@ -26,6 +32,8 @@ public class QuizPageActivity extends AppCompatActivity {
 
     private TextView questionNumberTextView, questionTextView, scoreTextView;
     private Button option1Button, option2Button, option3Button, option4Button;
+
+    private Vibrator vibrator;
 
     private List<Question> questionsList = new ArrayList<>();
     private int currentQuestionIndex = 0;
@@ -45,6 +53,10 @@ public class QuizPageActivity extends AppCompatActivity {
         option2Button = findViewById(R.id.option2Button);
         option3Button = findViewById(R.id.option3Button);
         option4Button = findViewById(R.id.option4Button);
+
+        // Assign the Vibrator instance to the class-level variable
+        VibratorManager vibratorManager = (VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
+        vibrator = vibratorManager.getDefaultVibrator();
 
         // Fetch quiz questions
         fetchQuizQuestions();
@@ -107,7 +119,7 @@ public class QuizPageActivity extends AppCompatActivity {
             // Shuffle options (to randomize button positions)
             List<String> options = new ArrayList<>(question.getIncorrect_answers());
             options.add(question.getCorrect_answer());
-            java.util.Collections.shuffle(options);
+            Collections.shuffle(options);
 
             // Set button texts
             option1Button.setText(options.get(0));
@@ -133,6 +145,12 @@ public class QuizPageActivity extends AppCompatActivity {
                 scoreTextView.setText(String.format("%s %d", getString(R.string.quiz_score), score));
             } else {
                 Toast.makeText(QuizPageActivity.this, "Wrong! Correct Answer: " + correctAnswer, Toast.LENGTH_SHORT).show();
+                // Vibrate for 500 milliseconds
+                if (vibrator != null && vibrator.hasVibrator()) {
+                    long duration = 500; // Define the duration in milliseconds
+                    vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
+                    Log.d("Vibration", "Vibration triggered for wrong answer");
+                }
             }
 
             // Move to the next question
