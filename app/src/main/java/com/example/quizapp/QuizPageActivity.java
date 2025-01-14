@@ -36,7 +36,6 @@ public class QuizPageActivity extends AppCompatActivity {
 
     private TextView questionNumberTextView, questionTextView, scoreTextView, difficultyTextView;
     private Button option1Button, option2Button, option3Button, option4Button;
-
     private Vibrator vibrator;
 
     private MediaPlayer mediaPlayer;
@@ -44,6 +43,8 @@ public class QuizPageActivity extends AppCompatActivity {
     private Difficulty difficulty;
 
     private int numQuestions;
+
+    private int categoryId;
 
     private List<Question> questionsList = new ArrayList<>();
     private int currentQuestionIndex = 0;
@@ -79,6 +80,9 @@ public class QuizPageActivity extends AppCompatActivity {
         }
         difficulty = Difficulty.valueOf(difficultyStr);
         numQuestions = intent.getIntExtra("numQuestions", 10);
+        Log.d("QuizPageActivity", "Number of Questions: " + numQuestions);
+        categoryId = intent.getIntExtra("categoryId", 0);
+        Log.d("QuizPageActivity", "Category ID: " + categoryId);
 
         // Fetch quiz questions
         fetchQuizQuestions();
@@ -93,10 +97,14 @@ public class QuizPageActivity extends AppCompatActivity {
 
         // Make API call
         Call<Quiz> call;
-        if (difficulty == Difficulty.any) {
-            call = quizAPI.getQuiz(10, "multiple", "url3986", null);
+        if (difficulty == Difficulty.any && categoryId == 0) {
+            call = quizAPI.getQuiz(numQuestions, "multiple", "url3986", null, null);
+        } else if (categoryId == 0) {
+            call = quizAPI.getQuiz(numQuestions, "multiple", "url3986", difficulty.toString(), null);
+        } else if (difficulty == Difficulty.any) {
+            call = quizAPI.getQuiz(numQuestions, "multiple", "url3986", null, categoryId);
         } else {
-            call = quizAPI.getQuiz(10, "multiple", "url3986", difficulty.toString());
+            call = quizAPI.getQuiz(numQuestions, "multiple", "url3986", difficulty.toString(), categoryId);
         }
         call.enqueue(new Callback<>() {
             @Override
@@ -122,12 +130,10 @@ public class QuizPageActivity extends AppCompatActivity {
             //Update question number and score in header
             questionNumberTextView.setText(String.format(getString(R.string.question_number), currentQuestionIndex + 1, questionsList.size()));
 
-
             // Get the current question
             Question question = questionsList.get(currentQuestionIndex);
 
             String difficulty = question.getDifficulty();
-
 
             int question_points;
 
@@ -236,6 +242,7 @@ public class QuizPageActivity extends AppCompatActivity {
             Intent restartIntent = new Intent(this, QuizPageActivity.class);
             restartIntent.putExtra("difficulty", difficulty.toString());
             restartIntent.putExtra("numQuestions", numQuestions);
+            restartIntent.putExtra("categoryId", categoryId);
             startActivity(restartIntent);
             finish();
         });
