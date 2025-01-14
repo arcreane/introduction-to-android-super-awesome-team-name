@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.VibratorManager;
@@ -15,12 +14,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Vibrator;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -93,10 +92,15 @@ public class QuizPageActivity extends AppCompatActivity {
         QuizAPI quizAPI = retrofit.create(QuizAPI.class);
 
         // Make API call
-        Call<Quiz> call = quizAPI.getQuiz(10, "multiple", "url3986");
-        call.enqueue(new Callback<Quiz>() {
+        Call<Quiz> call;
+        if (difficulty == Difficulty.any) {
+            call = quizAPI.getQuiz(10, "multiple", "url3986", null);
+        } else {
+            call = quizAPI.getQuiz(10, "multiple", "url3986", difficulty.toString());
+        }
+        call.enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<Quiz> call, Response<Quiz> response) {
+            public void onResponse(@NonNull Call<Quiz> call, @NonNull Response<Quiz> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     questionsList = response.body().getResults();
                     displayQuestion();
@@ -106,7 +110,7 @@ public class QuizPageActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<Quiz> call, Throwable t) {
+            public void onFailure(@NonNull Call<Quiz> call, @NonNull Throwable t) {
                 Toast.makeText(QuizPageActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("QuizAPI", "Failure: " + t.getMessage());
             }
@@ -116,7 +120,7 @@ public class QuizPageActivity extends AppCompatActivity {
     private void displayQuestion() {
         if (currentQuestionIndex < questionsList.size()) {
             //Update question number and score in header
-            questionNumberTextView.setText(String.format("%s%d/%d", getString(R.string.question_number), currentQuestionIndex + 1, questionsList.size()));
+            questionNumberTextView.setText(String.format(getString(R.string.question_number), currentQuestionIndex + 1, questionsList.size()));
 
 
             // Get the current question
@@ -162,7 +166,7 @@ public class QuizPageActivity extends AppCompatActivity {
             // Set button click listeners
             setOptionButtonListeners(question.getCorrect_answer(), question_points);
         } else {
-            Toast.makeText(this, "Quiz Completed!", Toast.LENGTH_LONG).show();
+            showSummaryDialog();
         }
     }
 
@@ -174,7 +178,7 @@ public class QuizPageActivity extends AppCompatActivity {
             if (selectedAnswer.equals(correctAnswer)) {
                 Toast.makeText(QuizPageActivity.this, "Correct!", Toast.LENGTH_SHORT).show();
                 score += points;
-                scoreTextView.setText(String.format("%s %d", getString(R.string.quiz_score), score));
+                scoreTextView.setText(String.format(getString(R.string.quiz_score), score));
                 // Play sound for correct answer
                 if (mediaPlayer != null) {
                     if (mediaPlayer.isPlaying()) {
@@ -242,7 +246,6 @@ public class QuizPageActivity extends AppCompatActivity {
             startActivity(restartIntent);
             finish();
         });
-
         dialog.show();
     }
 }
