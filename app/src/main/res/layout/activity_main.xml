@@ -85,6 +85,13 @@
 
     </LinearLayout>
 
+    <Spinner
+        android:id="@+id/quizSettingsCategorySpinner"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:spinnerMode="dropdown"
+        android:entries="@array/category_options"/>
+
     <!-- Submit Button -->
     <Button
         android:id="@+id/quizSettingsSubmitButton"

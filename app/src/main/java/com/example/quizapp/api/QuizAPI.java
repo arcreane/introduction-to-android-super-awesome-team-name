@@ -12,6 +12,7 @@ public interface QuizAPI {
             @Query("amount") int amount,
             @Query("type") String type,
             @Query("encode") String encode,
-            @Query("difficulty") String difficulty
+            @Query("difficulty") String difficulty,
+            @Query("category") Integer categoryId
             );
 }
