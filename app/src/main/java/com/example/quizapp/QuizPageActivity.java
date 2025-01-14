@@ -3,6 +3,7 @@ package com.example.quizapp;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.VibratorManager;
@@ -21,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,13 +39,16 @@ public class QuizPageActivity extends AppCompatActivity {
 
     private Vibrator vibrator;
 
+    private MediaPlayer mediaPlayer;
+
+    private Difficulty difficulty;
+
+    private int numQuestions;
+
     private List<Question> questionsList = new ArrayList<>();
     private int currentQuestionIndex = 0;
 
     private int score = 0;
-
-    private Difficulty difficulty;
-    private int numQuestions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +69,7 @@ public class QuizPageActivity extends AppCompatActivity {
         VibratorManager vibratorManager = (VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
         vibrator = vibratorManager.getDefaultVibrator();
 
+        mediaPlayer = MediaPlayer.create(this, R.raw.correct_answer);
         // Get difficulty and number of questions from intent
         Intent intent = getIntent();
         String difficultyStr = intent.getStringExtra("difficulty");
@@ -90,11 +94,9 @@ public class QuizPageActivity extends AppCompatActivity {
         // Make API call
         Call<Quiz> call;
         if (difficulty == Difficulty.any) {
-            call = quizAPI.getQuiz(numQuestions, "multiple", "url3986");
-            Log.d("QuizAPI", "Difficulty: Any");
+            call = quizAPI.getQuiz(10, "multiple", "url3986", null);
         } else {
-            call = quizAPI.getQuiz(numQuestions, "multiple", "url3986", difficulty.toString());
-            Log.d("QuizAPI", "Difficulty: " + difficulty);
+            call = quizAPI.getQuiz(10, "multiple", "url3986", difficulty.toString());
         }
         call.enqueue(new Callback<>() {
             @Override
@@ -177,6 +179,14 @@ public class QuizPageActivity extends AppCompatActivity {
                 Toast.makeText(QuizPageActivity.this, "Correct!", Toast.LENGTH_SHORT).show();
                 score += points;
                 scoreTextView.setText(String.format(getString(R.string.quiz_score), score));
+                // Play sound for correct answer
+                if (mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                        mediaPlayer.prepareAsync();
+                    }
+                    mediaPlayer.start();
+                }
             } else {
                 Toast.makeText(QuizPageActivity.this, "Wrong! Correct Answer: " + correctAnswer, Toast.LENGTH_SHORT).show();
                 // Vibrate for 500 milliseconds
@@ -196,8 +206,17 @@ public class QuizPageActivity extends AppCompatActivity {
         option2Button.setOnClickListener(listener);
         option3Button.setOnClickListener(listener);
         option4Button.setOnClickListener(listener);
+
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
     private void showSummaryDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.popup_quiz_summary, null);
         android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(this)
@@ -227,8 +246,6 @@ public class QuizPageActivity extends AppCompatActivity {
             startActivity(restartIntent);
             finish();
         });
-
         dialog.show();
     }
-
 }

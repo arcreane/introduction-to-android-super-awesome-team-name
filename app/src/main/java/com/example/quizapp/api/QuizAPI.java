@@ -14,11 +14,4 @@ public interface QuizAPI {
             @Query("encode") String encode,
             @Query("difficulty") String difficulty
             );
-
-    @GET("api.php?")
-    Call<Quiz> getQuiz(
-            @Query("amount") int amount,
-            @Query("type") String type,
-            @Query("encode") String encode
-    );
 }
